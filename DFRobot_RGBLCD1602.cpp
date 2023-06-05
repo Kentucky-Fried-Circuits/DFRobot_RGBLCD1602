@@ -54,7 +54,7 @@ esp_err_t DFRobot_RGBLCD1602::i2c_scan(const uint8_t addr)
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_WRITE, 1);
     i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(_i2c_num, cmd, RGBLCD1602_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
+    ret = i2c_master_cmd_begin(_i2c_num, cmd, LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     ESP_LOGD(_TAG, "i2c_scan(0x%2x) returning:%i", addr, (int)ret);
     return ret;
@@ -63,29 +63,29 @@ esp_err_t DFRobot_RGBLCD1602::i2c_scan(const uint8_t addr)
 /**
  * @brief  test communication to device.
  * @note i2c_driver_install must be done before init() by the calling program
- * @return esp_err_t returns the return value is i2c_master_cmd_begin()
+ * @return esp_err_t returns the return value of i2c_scan()
  **/
 // TODO change LOGI to LOGD
 esp_err_t DFRobot_RGBLCD1602::init()
 {
     esp_err_t ret;
     // find the LCD
-    ESP_RETURN_ON_ERROR(i2c_scan(RGBLCD1602_LCD_ADDRESS), _TAG, "lcd not found");
+    ESP_RETURN_ON_ERROR(i2c_scan(LCD_LCD_ADDRESS), _TAG, "lcd not found");
     // find the RGB device and set the color PWM registers
-    ret = i2c_scan(RGBLCD1602_RGB_ADDRESS);
+    ret = i2c_scan(LCD_RGB_ADDRESS);
     if (ret == ESP_OK) // found it
     {
-        _RGBAddr = RGBLCD1602_RGB_ADDRESS;
+        _RGBAddr = LCD_RGB_ADDRESS;
         REG_RED = 0x04;
         REG_GREEN = 0x03;
         REG_BLUE = 0x02; 
     }
     else
     {
-        ret = i2c_scan(RGBLCD1602_RGB_ADDRESS_ALT);
+        ret = i2c_scan(LCD_RGB_ADDRESS_ALT);
         if (ret == ESP_OK) // found it
         {
-            _RGBAddr = RGBLCD1602_RGB_ADDRESS_ALT;
+            _RGBAddr = LCD_RGB_ADDRESS_ALT;
             REG_RED = 0x06;   // pwm2
             REG_GREEN = 0x07; // pwm1
             REG_BLUE = 0x08;  // pwm0
@@ -93,99 +93,100 @@ esp_err_t DFRobot_RGBLCD1602::init()
     }
 
 
-	_showFunction = RGBLCD1602_4BITMODE | RGBLCD1602_1LINE | RGBLCD1602_5x8DOTS;
+	_showFunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
 	begin(_rows);
     return ret;
 }
 
 esp_err_t DFRobot_RGBLCD1602::clear()
 {
-    esp_err_t  ret = command(RGBLCD1602_CLEARDISPLAY); // clear display, set cursor position to zero
-    vTaskDelay(pdMS_TO_TICKS(2));     // this command takes a long time!
+    esp_err_t  ret = command(LCD_CLEARDISPLAY); // clear display, set cursor position to zero
+    vTaskDelay(pdMS_TO_TICKS(12));     // this command takes a long time!
+    home();
     return ret;
 }
 
     esp_err_t DFRobot_RGBLCD1602::home()
     {
-        esp_err_t ret = command(RGBLCD1602_RETURNHOME);        // set cursor position to zero
-        vTaskDelay(pdMS_TO_TICKS(2));          // this command takes a long time!
+        esp_err_t ret = command(LCD_RETURNHOME);        // set cursor position to zero
+        vTaskDelay(pdMS_TO_TICKS(12));          // this command takes a long time!
         return ret;
     }
 
     esp_err_t DFRobot_RGBLCD1602::noDisplay()
     {
-        _showControl &= ~RGBLCD1602_DISPLAYON;
-        return command(RGBLCD1602_DISPLAYCONTROL | _showControl);
+        _showControl &= ~LCD_DISPLAYON;
+        return command(LCD_DISPLAYCONTROL | _showControl);
     }
 
 esp_err_t DFRobot_RGBLCD1602::display() 
 {
-    _showControl |= RGBLCD1602_DISPLAYON;
-    return command(RGBLCD1602_DISPLAYCONTROL | _showControl);
+    _showControl |= LCD_DISPLAYON;
+    return command(LCD_DISPLAYCONTROL | _showControl);
 }
 
 esp_err_t DFRobot_RGBLCD1602::stopBlink()
 {
-    _showControl &= ~RGBLCD1602_BLINKON;
-    return command(RGBLCD1602_DISPLAYCONTROL | _showControl);
+    _showControl &= ~LCD_BLINKON;
+    return command(LCD_DISPLAYCONTROL | _showControl);
 }
 esp_err_t DFRobot_RGBLCD1602::blink()
 {
-    _showControl |= RGBLCD1602_BLINKON;
-    return command(RGBLCD1602_DISPLAYCONTROL | _showControl);
+    _showControl |= LCD_BLINKON;
+    return command(LCD_DISPLAYCONTROL | _showControl);
 }
 
 esp_err_t DFRobot_RGBLCD1602::noCursor()
 {
-    _showControl &= ~RGBLCD1602_CURSORON;
-    return command(RGBLCD1602_DISPLAYCONTROL | _showControl);
+    _showControl &= ~LCD_CURSORON;
+    return command(LCD_DISPLAYCONTROL | _showControl);
 }
 
 esp_err_t DFRobot_RGBLCD1602::cursor()
 {
-    _showControl |= RGBLCD1602_CURSORON;
-    return command(RGBLCD1602_DISPLAYCONTROL | _showControl);
+    _showControl |= LCD_CURSORON;
+    return command(LCD_DISPLAYCONTROL | _showControl);
 }
 
 // void DFRobot_RGBLCD1602::scrollDisplayLeft(void)
 // {
-//     command(RGBLCD1602_CURSORSHIFT | RGBLCD1602_DISPLAYMOVE | RGBLCD1602_MOVELEFT);
+//     command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
 // }
 
 // void DFRobot_RGBLCD1602::scrollDisplayRight(void)
 // {
-//     command(RGBLCD1602_CURSORSHIFT | RGBLCD1602_DISPLAYMOVE | RGBLCD1602_MOVERIGHT);
+//     command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
 // }
 
 // void DFRobot_RGBLCD1602::leftToRight(void)
 // {
-//     _showMode |= RGBLCD1602_ENTRYLEFT;
-//     command(RGBLCD1602_ENTRYMODESET | _showMode);
+//     _showMode |= LCD_ENTRYLEFT;
+//     command(LCD_ENTRYMODESET | _showMode);
 // }
 
 // void DFRobot_RGBLCD1602::rightToLeft(void)
 // {
-//     _showMode &= ~RGBLCD1602_ENTRYLEFT;
-//     command(RGBLCD1602_ENTRYMODESET | _showMode);
+//     _showMode &= ~LCD_ENTRYLEFT;
+//     command(LCD_ENTRYMODESET | _showMode);
 // }
 
 esp_err_t DFRobot_RGBLCD1602::noAutoscroll(void)
 {
-    _showMode &= ~RGBLCD1602_ENTRYSHIFTINCREMENT;
-    return command(RGBLCD1602_ENTRYMODESET | _showMode);
+    _showMode &= ~LCD_ENTRYSHIFTINCREMENT;
+    return command(LCD_ENTRYMODESET | _showMode);
 }
 
 esp_err_t DFRobot_RGBLCD1602::autoscroll(void)
 {
-    _showMode |= RGBLCD1602_ENTRYSHIFTINCREMENT;
-    return command(RGBLCD1602_ENTRYMODESET | _showMode);
+    _showMode |= LCD_ENTRYSHIFTINCREMENT;
+    return command(LCD_ENTRYMODESET | _showMode);
 }
 
 esp_err_t DFRobot_RGBLCD1602::customSymbol(uint8_t location, uint8_t charmap[])
 {
 
     location &= 0x7; // we only have 8 locations 0-7
-    esp_err_t ret = command(RGBLCD1602_SETCGRAMADDR | (location << 3));
+    esp_err_t ret = command(LCD_SETCGRAMADDR | (location << 3));
     if (ret != ESP_OK)
         return ret;
 
@@ -199,7 +200,6 @@ esp_err_t DFRobot_RGBLCD1602::customSymbol(uint8_t location, uint8_t charmap[])
                                       data, 9,
                                       5 / portTICK_PERIOD_MS);
 }
-
 esp_err_t DFRobot_RGBLCD1602::setCursor(uint8_t col, uint8_t row)
 {
 
@@ -207,7 +207,7 @@ esp_err_t DFRobot_RGBLCD1602::setCursor(uint8_t col, uint8_t row)
     const uint8_t data[] = {0x80, col};
     return i2c_master_write_to_device(_i2c_num, _lcdAddr,
                                data, 2,
-                               RGBLCD1602_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
+                               LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
 }
 
 esp_err_t DFRobot_RGBLCD1602::setRGB(uint8_t r, uint8_t g, uint8_t b)
@@ -245,7 +245,7 @@ inline size_t DFRobot_RGBLCD1602::write(uint8_t value)
     const uint8_t data[] = {0x40, value};
     esp_err_t ret = i2c_master_write_to_device(_i2c_num, _lcdAddr,
                                                data, 2,
-                                               RGBLCD1602_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
+                                               LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
     if (ret == ESP_OK)
     {
         return 1;
@@ -261,7 +261,7 @@ inline esp_err_t DFRobot_RGBLCD1602::command(uint8_t value)
     const uint8_t data[] = {0x80, value};
     return i2c_master_write_to_device(_i2c_num, _lcdAddr,
                                              data, 2,
-                                             RGBLCD1602_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
+                                             LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
 }
 
 void DFRobot_RGBLCD1602::print(const char *str)
@@ -277,6 +277,12 @@ void DFRobot_RGBLCD1602::print(const int i)
     sprintf(str, "%i", i);
     print(str);
 }
+void DFRobot_RGBLCD1602::print(const float f, uint8_t decimalPlaces)
+{
+    char str[16];
+    sprintf(str, "%.2f", f);
+    print(str);
+}
 
 // void DFRobot_RGBLCD1602::setBacklight(bool mode){
 // 	if(mode){
@@ -290,54 +296,54 @@ void DFRobot_RGBLCD1602::print(const int i)
 esp_err_t DFRobot_RGBLCD1602::begin( uint8_t rows, uint8_t charSize) 
 {
     if (rows > 1) {
-        _showFunction |= RGBLCD1602_2LINE;
+        _showFunction |= LCD_2LINE;
     }
     _numLines = rows;
     _currLine = 0;
     ///< for some 1 line displays you can select a 10 pixel high font
     if ((charSize != 0) && (rows == 1)) {
-        _showFunction |= RGBLCD1602_5x10DOTS;
+        _showFunction |= LCD_5x10DOTS;
     }
 
     ///< SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
     ///< according to datasheet, we need at least 40ms after power rises above 2.7V
     ///< before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(100));
 
     ///< this is according to the hitachi HD44780 datasheet
     ///< page 45 figure 23
 
     ///< Send function set command sequence
-    command(RGBLCD1602_FUNCTIONSET | _showFunction);
+    command(LCD_FUNCTIONSET | _showFunction);
     vTaskDelay(pdMS_TO_TICKS(5));  // wait more than 4.1ms
 	
 	///< second try
-    command(RGBLCD1602_FUNCTIONSET | _showFunction);
+    command(LCD_FUNCTIONSET | _showFunction);
     vTaskDelay(pdMS_TO_TICKS(5));
 
     ///< third go
-    ESP_ERROR_CHECK(command(RGBLCD1602_FUNCTIONSET | _showFunction));
+    ESP_ERROR_CHECK(command(LCD_FUNCTIONSET | _showFunction));
 
     ///< turn the display on with no cursor or blinking default
-    _showControl = RGBLCD1602_DISPLAYON | RGBLCD1602_CURSOROFF | RGBLCD1602_BLINKOFF;
+    _showControl = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
     display();
 
     ///< clear it off
     clear();
 
     ///< Initialize to default text direction (for romance languages)
-    _showMode = RGBLCD1602_ENTRYLEFT | RGBLCD1602_ENTRYSHIFTDECREMENT;
+    _showMode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
     ///< set the entry mode
-    command(RGBLCD1602_ENTRYMODESET | _showMode);
+    command(LCD_ENTRYMODESET | _showMode);
     
-    if(_RGBAddr == RGBLCD1602_RGB_ADDRESS){
+    if(_RGBAddr == LCD_RGB_ADDRESS){
       ///< backlight init
-        setReg(RGBLCD1602_REG_MODE1, 0);
+        setReg(LCD_REG_MODE1, 0);
         ///< set LEDs controllable by both PWM and GRPPWM registers
-        setReg(RGBLCD1602_REG_OUTPUT, 0xFF);
+        setReg(LCD_REG_OUTPUT, 0xFF);
         ///< set MODE2 values
         ///< 0010 0000 -> 0x20  (DMBLNK to 1, ie blinky mode)
-        setReg(RGBLCD1602_REG_MODE2, 0x20);
+        setReg(LCD_REG_MODE2, 0x20);
     }else{
       setReg(0x04, 0x15);
     }
@@ -355,7 +361,7 @@ esp_err_t DFRobot_RGBLCD1602::begin( uint8_t rows, uint8_t charSize)
 //     // _pWire->endTransmission();                     // stop transmitting
 //     return i2c_master_write_to_device(_i2c_num, _lcdAddr,
 //                                       data, len,
-//                                       RGBLCD1602_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
+//                                       LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
 // }
 
 esp_err_t DFRobot_RGBLCD1602::setReg(uint8_t addr, uint8_t data)
@@ -364,5 +370,5 @@ esp_err_t DFRobot_RGBLCD1602::setReg(uint8_t addr, uint8_t data)
     const uint8_t write_buffer[] = {addr, data};
     return i2c_master_write_to_device(_i2c_num, _RGBAddr,
                                         write_buffer, 2,
-                                        RGBLCD1602_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
+                                        LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
 }
