@@ -264,6 +264,11 @@ inline esp_err_t DFRobot_RGBLCD1602::command(uint8_t value)
                                              LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
 }
 
+void DFRobot_RGBLCD1602::print(const char chr)
+{
+    write(chr);
+}
+
 void DFRobot_RGBLCD1602::print(const char *str)
 {
     while (*str)

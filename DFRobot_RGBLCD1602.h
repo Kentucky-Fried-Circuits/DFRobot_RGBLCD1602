@@ -274,8 +274,14 @@ public:
     esp_err_t setBacklight(bool mode);
 
     /**
+     * @brief write a single char
+     *
+     */
+    void print(const char chr);
+
+    /**
      * @brief write a string
-     * 
+     *
      */
     void print(const char *str);
 
