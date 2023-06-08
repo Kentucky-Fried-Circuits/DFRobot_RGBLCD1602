@@ -22,70 +22,70 @@
 /*!
  *  @brief default Device I2C Addresses
  */
-#define RGBLCD1602_LCD_ADDRESS (0x7c >> 1)
-#define RGBLCD1602_RGB_ADDRESS_ALT (0x60 >> 1)
-#define RGBLCD1602_RGB_ADDRESS (0xc0 >> 1)
+#define LCD_LCD_ADDRESS (0x7c >> 1)
+#define LCD_RGB_ADDRESS_ALT (0x60 >> 1)
+#define LCD_RGB_ADDRESS (0xc0 >> 1)
 
 /*!
  *  @brief color define
  */
-#define RGBLCD1602_WHITE 0
-#define RGBLCD1602_RED 1
-#define RGBLCD1602_GREEN 2
-#define RGBLCD1602_BLUE 3
+#define LCD_WHITE 0
+#define LCD_RED 1
+#define LCD_GREEN 2
+#define LCD_BLUE 3
 
-#define RGBLCD1602_REG_MODE1 0x00
-#define RGBLCD1602_REG_MODE2 0x01
-#define RGBLCD1602_REG_OUTPUT 0x08
+#define LCD_REG_MODE1 0x00
+#define LCD_REG_MODE2 0x01
+#define LCD_REG_OUTPUT 0x08
 
 /*!
  *  @brief commands
  */
-#define RGBLCD1602_CLEARDISPLAY 0x01
-#define RGBLCD1602_RETURNHOME 0x02
-#define RGBLCD1602_ENTRYMODESET 0x04
-#define RGBLCD1602_DISPLAYCONTROL 0x08
-#define RGBLCD1602_CURSORSHIFT 0x10
-#define RGBLCD1602_FUNCTIONSET 0x20
-#define RGBLCD1602_SETCGRAMADDR 0x40
-#define RGBLCD1602_SETDDRAMADDR 0x80
-#define RGBLCD1602_COMMAND_DELAY_MS 5
+#define LCD_CLEARDISPLAY 0x01
+#define LCD_RETURNHOME 0x02
+#define LCD_ENTRYMODESET 0x04
+#define LCD_DISPLAYCONTROL 0x08
+#define LCD_CURSORSHIFT 0x10
+#define LCD_FUNCTIONSET 0x20
+#define LCD_SETCGRAMADDR 0x40
+#define LCD_SETDDRAMADDR 0x80
+#define LCD_COMMAND_DELAY_MS 5
 
 /*!
  *  @brief flags for display entry mode
  */
-#define RGBLCD1602_ENTRYRIGHT 0x00
-#define RGBLCD1602_ENTRYLEFT 0x02
-#define RGBLCD1602_ENTRYSHIFTINCREMENT 0x01
-#define RGBLCD1602_ENTRYSHIFTDECREMENT 0x00
+#define LCD_ENTRYRIGHT 0x00
+#define LCD_ENTRYLEFT 0x02
+#define LCD_ENTRYSHIFTINCREMENT 0x01
+#define LCD_ENTRYSHIFTDECREMENT 0x00
 
 /*!
  *  @brief flags for display on/off control
  */
-#define RGBLCD1602_DISPLAYON 0x04
-#define RGBLCD1602_DISPLAYOFF 0x00
-#define RGBLCD1602_CURSORON 0x02
-#define RGBLCD1602_CURSOROFF 0x00
-#define RGBLCD1602_BLINKON 0x01
-#define RGBLCD1602_BLINKOFF 0x00
+#define LCD_DISPLAYON 0x04
+#define LCD_DISPLAYOFF 0x00
+#define LCD_CURSORON 0x02
+#define LCD_CURSOROFF 0x00
+#define LCD_BLINKON 0x01
+#define LCD_BLINKOFF 0x00
 
 /*!
  *  @brief flags for display/cursor shift
  */
-#define RGBLCD1602_DISPLAYMOVE 0x08
-#define RGBLCD1602_CURSORMOVE 0x00
-#define RGBLCD1602_MOVERIGHT 0x04
-#define RGBLCD1602_MOVELEFT 0x00
+#define LCD_DISPLAYMOVE 0x08
+#define LCD_CURSORMOVE 0x00
+#define LCD_MOVERIGHT 0x04
+#define LCD_MOVELEFT 0x00
 
 /*!
  *  @brief flags for function set
  */
-#define RGBLCD1602_8BITMODE 0x10
-#define RGBLCD1602_4BITMODE 0x00
-#define RGBLCD1602_2LINE 0x08
-#define RGBLCD1602_1LINE 0x00
-#define RGBLCD1602_5x10DOTS 0x04
-#define RGBLCD1602_5x8DOTS 0x00
+#define LCD_8BITMODE 0x10
+#define LCD_4BITMODE 0x00
+#define LCD_2LINE 0x08
+#define LCD_1LINE 0x00
+#define LCD_5x10DOTS 0x04
+#define LCD_5x8DOTS 0x00
 
 class DFRobot_RGBLCD1602 // : public Print  --yeah don't know if I'll be able to extend Arduino's print
 {
@@ -119,7 +119,7 @@ public:
     // Constructor 
     // -----------------------------------------------------------------------------
     DFRobot_RGBLCD1602(uint8_t lcdCols, uint8_t lcdRows, i2c_port_t i2c_num = I2C_NUM_0, 
-        uint8_t lcdAddr = RGBLCD1602_LCD_ADDRESS, uint8_t RGBAddr = RGBLCD1602_RGB_ADDRESS);
+        uint8_t lcdAddr = LCD_LCD_ADDRESS, uint8_t RGBAddr = LCD_RGB_ADDRESS);
 
     // -----------------------------------------------------------------------------
     // init()
@@ -203,6 +203,9 @@ public:
      *  @param charmap  character array the size is 8 bytes
      */
     esp_err_t customSymbol(uint8_t location, uint8_t charmap[]);
+    inline void createChar(uint8_t location, uint8_t charmap[]) { 
+      customSymbol(location, charmap);
+    }
 
     /**
      *  @brief set cursor position
@@ -271,8 +274,14 @@ public:
     esp_err_t setBacklight(bool mode);
 
     /**
+     * @brief write a single char
+     *
+     */
+    void print(const char chr);
+
+    /**
      * @brief write a string
-     * 
+     *
      */
     void print(const char *str);
 
@@ -281,14 +290,19 @@ public:
      *
      */
     void print(const int i);
+    /**
+     * @brief write a float to the specified number of decimal places
+     *
+     */
+    void print(const float f, uint8_t decimalPlaces);
 
   private:
     /**
      *  @brief the initialization function
      *  @param row rows optional range 0-1，0 is the first row, 1 is the second row
-     *  @param charSize  character size RGBLCD1602_5x8DOTS\RGBLCD1602_5x10DOTS
+     *  @param charSize  character size LCD_5x8DOTS\LCD_5x10DOTS
      */
-    esp_err_t begin(uint8_t rows, uint8_t charSize = RGBLCD1602_5x8DOTS);
+    esp_err_t begin(uint8_t rows, uint8_t charSize = LCD_5x8DOTS);
 
     /**
      *  @brief set the backlight register
