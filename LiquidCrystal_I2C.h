@@ -1,5 +1,14 @@
 #pragma once
 #include "DFRobot_RGBLCD1602.h"
+// #ifdef ARDUINO
+// #warning LC ARDIUNO defined
+// #if (ARDUINO >= 100)
+// #warning LC ARDIUNO >= 100
+// #include "Arduino.h"
+// #else
+// #include "WProgram.h"
+// #endif
+// #endif
 
 #ifdef __cplusplus
 extern "C" {
