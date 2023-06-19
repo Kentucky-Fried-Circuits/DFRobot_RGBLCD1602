@@ -11,9 +11,9 @@
 
 #pragma once
 #ifdef ARDUINO
-#warning ARDIUNO defined
+// #warning ARDIUNO defined
   #if (ARDUINO >= 100)
-#warning ARDIUNO >= 100
+// #warning ARDIUNO >= 100
 #include "Arduino.h"
 #else
 #include "WProgram.h"
