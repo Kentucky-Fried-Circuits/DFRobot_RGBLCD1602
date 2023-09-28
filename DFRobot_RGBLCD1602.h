@@ -10,6 +10,15 @@
  */
 
 #pragma once
+#ifdef ARDUINO
+// #warning ARDIUNO defined
+  #if (ARDUINO >= 100)
+// #warning ARDIUNO >= 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#endif
+#endif
 
 // /*
 // #include <inttypes.h>
@@ -88,7 +97,11 @@
 #define LCD_5x10DOTS 0x04
 #define LCD_5x8DOTS 0x00
 
-class DFRobot_RGBLCD1602 // : public Print  --yeah don't know if I'll be able to extend Arduino's print
+#ifdef ARDUINO
+class DFRobot_RGBLCD1602     : public Print  // TODO instead of this conditional , put my print() in it's own class
+#else
+    class DFRobot_RGBLCD1602 // : public Print  print implemented internally to class
+#endif
 {
 private:
     static constexpr const char *_TAG = "DFRobot_RGBLCD1602";
@@ -282,6 +295,7 @@ public:
      */
     esp_err_t setBacklight(bool mode);
 
+    #ifndef ARDUINO // roll our own print()
     /**
      * @brief write a single char
      *
@@ -304,6 +318,7 @@ public:
      *
      */
     void print(const float f, uint8_t decimalPlaces);
+#endif // ARDUINO
 
   private:
     /**
@@ -328,5 +343,4 @@ public:
     uint8_t _RGBAddr;
     uint8_t _cols;
     uint8_t _rows;
-      
 };

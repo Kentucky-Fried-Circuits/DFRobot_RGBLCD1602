@@ -289,6 +289,7 @@ inline esp_err_t DFRobot_RGBLCD1602::command(uint8_t value)
                                       LCD_COMMAND_DELAY_MS / portTICK_PERIOD_MS);
 }
 
+#ifndef ARDUINO // roll our own print functions
 void DFRobot_RGBLCD1602::print(const char chr)
 {
     write(chr);
@@ -313,7 +314,7 @@ void DFRobot_RGBLCD1602::print(const float f, uint8_t decimalPlaces)
     sprintf(str, "%.2f", f);
     print(str);
 }
-
+#endif //ARDUINO
 // void DFRobot_RGBLCD1602::setBacklight(bool mode){
 // 	if(mode){
 // 		setColorWhite();		// turn backlight on
