@@ -33,7 +33,8 @@
  */
 #define LCD_LCD_ADDRESS (0x7c >> 1)
 #define LCD_RGB_ADDRESS_ALT (0x60 >> 1)
-#define LCD_RGB_ADDRESS (0xc0 >> 1)
+#define LCD_RGB_ADDRESS_ALT2 (0x6b ) // LCD1602 module V1.1
+#define LCD_RGB_ADDRESS (0xc0 >> 1)  // = 0x60. LCD1602 module V1.0 and LCD1602 RGB Module V1.0
 
 /*!
  *  @brief color define
@@ -235,12 +236,20 @@ public:
      */
     esp_err_t setRGB(uint8_t r, uint8_t g, uint8_t b);
 
+    // /**
+    //  *  @brief set backlight PWM output
+    //  *  @param color  backlight color  Preferences：REG_RED\REG_GREEN\REG_BLUE
+    //  *  @param pwm  color intensity   range(0-255)
+    //  */
+    // esp_err_t setPWM(uint8_t color, uint8_t pwm) {return setReg(color, pwm);}      // set pwm
+
     /**
-     *  @brief set backlight PWM output
-     *  @param color  backlight color  Preferences：REG_RED\REG_GREEN\REG_BLUE
-     *  @param pwm  color intensity   range(0-255)
+     * @fn setPWM
+     * @brief set backlight PWM output
+     * @param color  backlight color  Preferences：REG_RED\REG_GREEN\REG_BLUE
+     * @param pwm  color intensity   range(0-255)
      */
-    esp_err_t setPWM(uint8_t color, uint8_t pwm) {return setReg(color, pwm);}      // set pwm
+    void setPWM(uint8_t color, uint8_t pwm);
 
     /**
      *  @brief backlight color
